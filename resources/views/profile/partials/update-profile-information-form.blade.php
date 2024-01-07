@@ -13,7 +13,7 @@
         @csrf
     </form>
 
-    <form method="post" action="{{ route('profile.update') }}" class="mt-6 space-y-6">
+    <form method="post" action="{{ route('profile.update') }}" class="mt-6 space-y-6" enctype="multipart/form-data">
         @csrf
         @method('patch')
 
@@ -33,10 +33,10 @@
                     <p class="text-sm mt-2 text-gray-800">
                         {{ __('Your email address is unverified.') }}
 
-                        <button form="send-verification" class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                            {{ __('Click here to re-send the verification email.') }}
-                        </button>
-                    </p>
+                                <button form="send-verification" class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                    {{ __('Click here to re-send the verification email.') }}
+                                </button>
+                            </p>
 
                     @if (session('status') === 'verification-link-sent')
                         <p class="mt-2 font-medium text-sm text-green-600">
@@ -45,6 +45,16 @@
                     @endif
                 </div>
             @endif
+        </div>
+
+        <div>
+            <x-input-label for="name" :value="__('Image')" />
+            <div class="userImage" style="max-width: 300px">
+                <input type="file" name="userImage" class="dropify"
+                       data-height="300"
+                       data-default-file="{{isset($user->user_image) && !empty($user->user_image) ?asset('storage/user-image/'.$user->user_image):('https://bootdey.com/img/Content/avatar/avatar1.png')}}" />
+            </div>
+
         </div>
 
         <div class="flex items-center gap-4">

@@ -9,10 +9,16 @@ $(document).ready(function () {
 
         let getRequestedUserId = $(this).attr('data-userId')
         let getRequestedUserName = $(this).attr('data-userName')
+        let getRequestedUserImage = $(this).attr('data-userImage')
         receiver_id = getRequestedUserId;
         $('.message-body').removeClass('d-none');
         // $('.chat-messages').html('');
         $('#sender-name').text(getRequestedUserName)
+        $('#user-image').attr('src',getRequestedUserImage)
+
+        loadOldChat(getRequestedUserName)
+        scrollChat()
+
     });
 
     //save chat hear
@@ -57,6 +63,7 @@ $(document).ready(function () {
                                         </div>`;
 
                     $('.chat-messages').append(chatHtml)
+                    scrollChat()
 
                 } else {
                     alert(response.msg)
@@ -66,6 +73,150 @@ $(document).ready(function () {
     })
 
 })
+
+function loadOldChat(getRequestedUserName) {
+    $.ajax({
+        url: '/load-old-chat',
+        type: 'POST',
+        data: {
+            sender_id: sender_id,
+            receiver_id: receiver_id
+        },
+        success: function (response) {
+
+            if (response.success) {
+                let html = '';
+                let chats = response.data
+                let dynamicClass = ''
+                let user = '';
+                for (let i = 0; i < chats.length; i++) {
+
+                    if (chats[i].sender_id == sender_id) {
+                        dynamicClass = 'chat-message-right';
+                        user = 'You';
+                    } else {
+                        dynamicClass = 'chat-message-left';
+                        user = getRequestedUserName
+                    }
+
+                    html += `<div class="` + dynamicClass + ` pb-4">
+                                            <div>
+                                                <img
+                                                    src="https://bootdey.com/img/Content/avatar/avatar1.png"
+                                                    class="rounded-circle mr-1"
+                                                    alt="Chris Wood"
+                                                    width="40"
+                                                    height="40"
+                                                />
+                                                <div class="text-muted small text-nowrap mt-2">
+                                                    ${formateDateTime(chats[i].created_at)}
+                                                </div>
+                                            </div>
+                                            <div class="flex-shrink-1 bg-light rounded py-2 px-3 mr-3">
+                                                <div class="font-weight-bold mb-1">${user}</div>
+                                                ${chats[i].messages}
+                                            </div>
+                                        </div>`
+
+                }
+
+                $('.chat-messages').html(html);
+                $('.chat-messages').attr('data-totalChat', response.totalChat);
+                scrollChat();
+
+            }
+
+        }
+    })
+}
+
+function scrollChat() {
+    $('.chat-messages').animate({
+        scrollTop: $('.chat-messages').offset().top + $('.chat-messages')[0].scrollHeight
+    }, 0)
+}
+
+//scroll call ajax
+
+$(document).ready(function () {
+    let container = $('.chat-messages');
+    let totalChat = $('.chat-messages').attr('data-totalChat');
+    let offset = $('.chat-messages').attr('data-offset');
+    if (totalChat < offset) {
+        container.scroll(function () {
+
+            if (container.scrollTop() == 0) {
+
+                let userName = $('.user-list').attr('data-userName');
+
+                $.ajax({
+                    url: '/load-more-chat',
+                    type: 'POST',
+                    dataType: 'json',
+                    data: {
+                        sender_id: sender_id,
+                        receiver_id: receiver_id,
+                        offset: offset
+                    },
+                    success: function (response) {
+
+                        // $.each(response, function (index, data) {
+                        //
+                        // });
+
+                        if (response.success) {
+                            let html = '';
+                            let chats = response.data
+                            let dynamicClass = ''
+                            let user = '';
+                            let lateseOffsetValue = parseInt(response.moreChatCount) + parseInt(offset);
+                            $('.chat-messages').attr('data-offset', lateseOffsetValue)
+                            for (let i = 0; i < chats.length; i++) {
+
+                                if (chats[i].sender_id == sender_id) {
+                                    dynamicClass = 'chat-message-right';
+                                    user = 'You';
+                                } else {
+                                    dynamicClass = 'chat-message-left';
+                                    user = userName
+                                }
+
+                                html += `<div class="` + dynamicClass + ` pb-4">
+                                            <div>
+                                                <img
+                                                    src="https://bootdey.com/img/Content/avatar/avatar1.png"
+                                                    class="rounded-circle mr-1"
+                                                    alt="Chris Wood"
+                                                    width="40"
+                                                    height="40"
+                                                />
+                                                <div class="text-muted small text-nowrap mt-2">
+                                                    ${formateDateTime(chats[i].created_at)}
+                                                </div>
+                                            </div>
+                                            <div class="flex-shrink-1 bg-light rounded py-2 px-3 mr-3">
+                                                <div class="font-weight-bold mb-1">${user}</div>
+                                                ${chats[i].messages}
+                                            </div>
+                                        </div>`
+
+                            }
+
+                            $('.chat-messages').prepend(html);
+
+                        }
+
+                    },
+                    error: function (xhr, status, error) {
+                        console.error('Error fetching data: ', error);
+                    }
+                });
+            }
+        });
+    }
+
+});
+
 
 window.Echo.join('private-chat')
     .here((users) => {
@@ -103,6 +254,7 @@ window.Echo.private('send-message')
         let name = data.userInformations.sender_details.name
 
         if (sender_id == data.chat.receiver_id && receiver_id == data.chat.sender_id) {
+
             let chatHtml = ` <div class="chat-message-left pb-4">
                                  <div>
                                     <img

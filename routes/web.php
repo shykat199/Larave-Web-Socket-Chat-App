@@ -23,6 +23,8 @@ Route::middleware('auth')->group(function () {
 
 Route::controller(ChatController::class)->group(function () {
     Route::post('/save-chat', 'saveChat')->name('save-chat');
+    Route::post('/load-old-chat', 'loadOldChat')->name('load-old-chat');
+    Route::post('/load-more-chat', 'loadMoreChat')->name('load-more-chat');
 });
 
 require __DIR__ . '/auth.php';

@@ -1,17 +1,28 @@
 <nav x-data="{ open: false }" class="bg-white border-b border-gray-100">
     <!-- Primary Navigation Menu -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-7">
-        <div class="flex justify-between h-5">
+        @php
+        $height='';
+        $marginButtom='';
+        if (Request::segment(1) == 'dashboard'){
+           $marginButtom='mb-4' ;
+           $height='h-5';
+        }else{
+            $marginButtom='mb-1' ;
+           $height='h-12';
+        }
+        @endphp
+        <div class="flex justify-between {{$height}}">
             <div class="flex">
                 <!-- Logo -->
-                <div class="shrink-0 flex items-center mb-4" >
+                <div class="shrink-0 flex items-center {{$marginButtom}}" >
                     <a href="{{ route('dashboard') }}">
                         <x-application-logo class="block h-6 w-auto fill-current text-gray-800" />
                     </a>
                 </div>
 
                 <!-- Navigation Links -->
-                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex mb-4">
+                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex {{$marginButtom}}">
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                         {{ __('Message Room') }}
                     </x-nav-link>
@@ -19,7 +30,7 @@
             </div>
 
             <!-- Settings Dropdown -->
-            <div class="hidden sm:flex sm:items-center mb-4">
+            <div class="hidden sm:flex sm:items-center {{$marginButtom}}">
                 <x-dropdown align="right" width="48">
                     <x-slot name="trigger">
                         <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150">

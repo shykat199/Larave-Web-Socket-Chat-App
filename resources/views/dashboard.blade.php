@@ -58,8 +58,8 @@
         </style>
     @endpush
 
-    <div class="container p-0">
-        <div class="card mt-2" style="min-height: 600px">
+    <div class="container">
+        <div class="card mt-2" style="min-height: 580px">
             <div class="row g-0">
                 @include('side-bar',['allUsers'=>$allUsers])
 

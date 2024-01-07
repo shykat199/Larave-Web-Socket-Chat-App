@@ -2,7 +2,7 @@
     <div class="py-2 px-4 border-bottom d-none d-lg-block">
         <div class="d-flex align-items-center py-1">
             <div class="position-relative">
-                <img
+                <img id="user-image"
                     src="https://bootdey.com/img/Content/avatar/avatar3.png"
                     class="rounded-circle mr-1"
                     alt="Sharon Lessman"
@@ -81,7 +81,7 @@
         </div>
     </div>
     <div class="position-relative">
-        <div class="chat-messages p-4">
+        <div class="chat-messages p-4" style="min-height: 450px; max-height: 420px;" data-offset="5" data-totalChat="">
 
 
         </div>

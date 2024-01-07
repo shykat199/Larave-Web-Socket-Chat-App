@@ -12,13 +12,15 @@ class Chat extends Model
     protected $fillable = ['sender_id', 'receiver_id', 'messages'];
     protected $table = 'chats';
 
-    public function senderDetails(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    public function sender(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(User::class,'sender_id','id');
     }
 
-    public function reveiverDetails(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    public function receiver(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(User::class,'receiver_id','id');
     }
+
+
 }
