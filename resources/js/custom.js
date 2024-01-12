@@ -12,6 +12,7 @@ $(document).ready(function () {
         let getRequestedUserImage = $(this).attr('data-userImage')
         receiver_id = getRequestedUserId;
         $('.message-body').removeClass('d-none');
+        $('#message').val('');
         // $('.chat-messages').html('');
         $('#sender-name').text(getRequestedUserName)
         $('#user-image').attr('src',getRequestedUserImage)
@@ -216,6 +217,47 @@ $(document).ready(function () {
     }
 
 });
+
+//Typing... event
+
+$(document).ready(function (){
+    let typingTimer;
+    const typingTimeout = 1000;
+
+    $('#message').on('input', function () {
+        clearTimeout(typingTimer);
+        startTyping();
+        typingTimer = setTimeout(stopTyping, typingTimeout);
+    });
+
+    function startTyping() {
+        $('#typingIndicator').removeClass('d-none')
+        $.post(`/start-typing/${receiver_id}`, function (data) {
+            console.log('Start Typing event sent successfully', data);
+        });
+    }
+
+    function stopTyping() {
+        $('#typingIndicator').addClass('d-none')
+        $.post(`/stop-typing/${receiver_id}`, function (data) {
+            console.log('Stop Typing event sent successfully', data);
+        });
+    }
+
+
+    // window.Echo.private('typingEvent')
+    //     .listen('.typingEvent',(data)=>{
+    //         console.log('Received typing event:', data);
+    //         if (data.isTyping){
+    //             console.log( $('#typingIndicator'));
+    //             $('#typingIndicator').removeClass('d-none')
+    //             // startTyping();
+    //         }else{
+    //             $('#typingIndicator').addClass('d-none')
+    //             // stopTyping();
+    //         }
+    //     })
+})
 
 
 window.Echo.join('private-chat')

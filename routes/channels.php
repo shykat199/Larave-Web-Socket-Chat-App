@@ -14,3 +14,8 @@ Broadcast::channel('private-chat',function ($user){
 Broadcast::channel('send-message',function ($user){
     return $user;
 });
+
+Broadcast::channel('typingEvent',function ($user){
+    return $user;
+
+});

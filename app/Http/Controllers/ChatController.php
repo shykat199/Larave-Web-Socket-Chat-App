@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Events\ChatEvent;
 use App\Events\SendMessageEvent;
+use App\Events\TypingEvent;
 use App\Models\Chat;
 use Illuminate\Http\Request;
 use mysql_xdevapi\Exception;
@@ -102,7 +103,7 @@ class ChatController extends Controller
 //                $query->orWhere('receiver_id','=',$request->post('sender_id'));
 //            })->limit(10)->offset($request->post('offset'))->get();
 
-            $moreChats = Chat::with(['sender:id,name,image', 'receiver:id,name,image'])
+            $moreChats = Chat::with(['sender:id,name,user_image', 'receiver:id,name,user_image'])
                 ->where(function ($query) use($request){
                     $query->where('sender_id','=',$request->post('sender_id'));
                     $query->orWhere('sender_id','=',$request->post('receiver_id'));
@@ -125,5 +126,22 @@ class ChatController extends Controller
                 'msg' => $e->getMessage()
             ]);
         }
+    }
+
+    public function startTyping(Request $request, $id)
+    {
+        $this->broadcastTypingEvent($id, true);
+        return response()->json(['status' => 'success']);
+    }
+
+    public function stopTyping(Request $request, $id)
+    {
+        $this->broadcastTypingEvent($id, false);
+        return response()->json(['status' => 'success']);
+    }
+
+    protected function broadcastTypingEvent($receiverId, $isTyping)
+    {
+        broadcast(new TypingEvent($receiverId, $isTyping));
     }
 }

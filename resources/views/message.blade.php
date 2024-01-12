@@ -12,7 +12,9 @@
             </div>
             <div class="flex-grow-1 pl-3">
                 <strong id="sender-name"></strong>
-                <div class="text-muted small"><em>Typing...</em></div>
+                <div class="text-muted small">
+                    <em id="typingIndicator" class="d-none">Typing...</em>
+                </div>
             </div>
             <div>
                 <button class="btn btn-primary btn-lg mr-1 px-3">
