@@ -10,10 +10,14 @@
             </div>
         </div>
     </div>
+    @php
+    $currentUser = \App\Models\User::select('name','user_image')->where('id','=',Auth::id())->first();
+    $currentUserImage = isset($currentUser->user_image) && !empty($currentUser->user_image) ? (asset('storage/user-image/'.$currentUser->user_image)) : 'https://bootdey.com/img/Content/avatar/avatar1.png';
+     @endphp
     @forelse($allUsers as $user)
         <a href="#" class="list-group-item list-group-item-action border-0 user-list" data-userId="{{$user->id}}" data-userName="{{$user->name}}"
-           data-userImage="{{isset($user->user_image) && !empty($user->user_image) ? (asset('storage/user-image/'.$user->user_image)) : ('https://bootdey.com/img/Content/avatar/avatar5.png')}}">
-            <div class="badge bg-success float-right">5</div>
+           data-currentUserImage="{{$currentUserImage}}" data-userImage="{{isset($user->user_image) && !empty($user->user_image) ? (asset('storage/user-image/'.$user->user_image)) : ('https://bootdey.com/img/Content/avatar/avatar5.png')}}">
+            <div class="badge bg-success float-right">{{$user->id}}</div>
             <div class="d-flex align-items-start">
                 <img
                     src="{{isset($user->user_image) && !empty($user->user_image) ?asset('storage/user-image/'.$user->user_image):('https://bootdey.com/img/Content/avatar/avatar5.png')}}"

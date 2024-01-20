@@ -25,8 +25,9 @@ Route::controller(ChatController::class)->group(function () {
     Route::post('/save-chat', 'saveChat')->name('save-chat');
     Route::post('/load-old-chat', 'loadOldChat')->name('load-old-chat');
     Route::post('/load-more-chat', 'loadMoreChat')->name('load-more-chat');
-    Route::post('/start-typing/{id}', 'startTyping')->name('startTyping');
-    Route::post('/stop-typing/{id}', 'stopTyping')->name('stopTyping');
+    Route::post('/start-typing/{id}/{id2}', 'startTyping')->name('startTyping');
+    Route::post('/stop-typing/{id}/{id2}', 'stopTyping')->name('stopTyping');
+    Route::get('/delete-chat/{id}', 'deleteChat')->name('deleteChat');
 });
 
 require __DIR__ . '/auth.php';

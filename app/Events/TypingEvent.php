@@ -14,22 +14,33 @@ class TypingEvent implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
     public $receiverId;
+    public $senderId;
     public $isTyping;
+    public $message;
     /**
      * Create a new event instance.
      */
-    public function __construct($receiverId, $isTyping)
+    public function __construct($message,$receiverId,$senderId,$isTyping)
     {
         $this->receiverId = $receiverId;
+        $this->senderId = $senderId;
         $this->isTyping = $isTyping;
+        $this->message = $message;
     }
 
-    public function broadcastWith()
+    public function broadcastWith(): array
     {
         return [
+            'message' => $this->message,
+            'isTyping' => $this->isTyping,
             'receiverId' => $this->receiverId,
-            'isTyping' => $this->isTyping
+            'senderId' => $this->senderId,
         ];
+    }
+
+    public function broadcastAs(): string
+    {
+        return 'typingEvent';
     }
 
     /**
@@ -40,7 +51,7 @@ class TypingEvent implements ShouldBroadcast
     public function broadcastOn(): array
     {
         return [
-            new PrivateChannel('typingEvent'),
+            new Channel('typing'),
         ];
     }
 }

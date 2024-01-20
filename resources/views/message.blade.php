@@ -83,11 +83,15 @@
         </div>
     </div>
     <div class="position-relative">
-        <div class="chat-messages p-4" style="min-height: 450px; max-height: 420px;" data-offset="5" data-totalChat="">
+        <div class="chat-messages p-4" style="min-height: 450px; max-height: 420px;" data-offset="10" data-totalChat="">
 
 
         </div>
     </div>
+    @php
+        $currentUser = \App\Models\User::select('name','user_image')->where('id','=',Auth::id())->first();
+        $currentUserImage = isset($currentUser->user_image) && !empty($currentUser->user_image) ? (asset('storage/user-image/'.$currentUser->user_image)) : 'https://bootdey.com/img/Content/avatar/avatar1.png';
+    @endphp
     <form action="" id="chat-form">
     <div class="flex-grow-0 py-3 px-4 border-top">
         <div class="input-group">
@@ -97,6 +101,7 @@
                     class="form-control"
                     placeholder="Type your message...."
                     name="message"
+                    data-currentUserImage="{{$currentUserImage}}"
                     id="message"
                 />
                 <button class="btn btn-primary">Send</button>

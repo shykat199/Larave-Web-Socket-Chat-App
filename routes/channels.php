@@ -15,7 +15,6 @@ Broadcast::channel('send-message',function ($user){
     return $user;
 });
 
-Broadcast::channel('typingEvent',function ($user){
+Broadcast::channel('message-deleted',function ($user){
     return $user;
-
 });

@@ -5,8 +5,8 @@ $.ajaxSetup({
 });
 
 $(document).ready(function () {
-    $('.user-list').on('click', function () {
 
+    $('.user-list').on('click', function () {
         let getRequestedUserId = $(this).attr('data-userId')
         let getRequestedUserName = $(this).attr('data-userName')
         let getRequestedUserImage = $(this).attr('data-userImage')
@@ -15,7 +15,7 @@ $(document).ready(function () {
         $('#message').val('');
         // $('.chat-messages').html('');
         $('#sender-name').text(getRequestedUserName)
-        $('#user-image').attr('src',getRequestedUserImage)
+        $('#user-image').attr('src', getRequestedUserImage)
 
         loadOldChat(getRequestedUserName)
         scrollChat()
@@ -27,6 +27,7 @@ $(document).ready(function () {
     $('#chat-form').submit(function (e) {
         e.preventDefault();
         let message = $('#message').val();
+        let currentUserImage = $('#message').attr('data-currentUserImage');
 
         $.ajax({
             url: '/save-chat',
@@ -43,11 +44,12 @@ $(document).ready(function () {
 
                     let chat = response.data.messages;
                     let time = response.data.created_at;
+                    let chat_id = response.data.id;
 
                     let chatHtml = ` <div class="chat-message-right pb-4">
                                             <div>
                                                 <img
-                                                    src="https://bootdey.com/img/Content/avatar/avatar1.png"
+                                                    src="${currentUserImage}"
                                                     class="rounded-circle mr-1"
                                                     alt="Chris Wood"
                                                     width="40"
@@ -60,6 +62,15 @@ $(document).ready(function () {
                                             <div class="flex-shrink-1 bg-light rounded py-2 px-3 mr-3">
                                                 <div class="font-weight-bold mb-1">You</div>
                                                 ${chat}
+                                            </div>
+                                            <div class="dropdown">
+                                                <button class="btn"  id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                                                ...
+                                                </button>
+                                                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                                                    <li><a class="dropdown-item delete" id="delete-${chat_id}" data-chatId="${chat_id}" href="#">Delete</a></li>
+                                                    <li><a class="dropdown-item edit" id="edit-${chat_id} + '" data-chatId="${chat_id}" href="#">Edit</a></li>
+                                                </ul>
                                             </div>
                                         </div>`;
 
@@ -86,10 +97,13 @@ function loadOldChat(getRequestedUserName) {
         success: function (response) {
 
             if (response.success) {
-                let html = '';
                 let chats = response.data
+                let html = '';
                 let dynamicClass = ''
                 let user = '';
+                let userImage = '';
+                let modfyChat = ''
+
                 for (let i = 0; i < chats.length; i++) {
 
                     if (chats[i].sender_id == sender_id) {
@@ -100,10 +114,16 @@ function loadOldChat(getRequestedUserName) {
                         user = getRequestedUserName
                     }
 
-                    html += `<div class="` + dynamicClass + ` pb-4">
+                    if (chats[i].sender_id === sender_id) {
+                        userImage = chats[i].receiver.user_image;
+                    } else {
+                        userImage = chats[i].sender.user_image;
+                    }
+
+                    html += `<div id="chat-${chats[i].id}" class="` + dynamicClass + ` pb-4">
                                             <div>
                                                 <img
-                                                    src="https://bootdey.com/img/Content/avatar/avatar1.png"
+                                                    src="${userImage}"
                                                     class="rounded-circle mr-1"
                                                     alt="Chris Wood"
                                                     width="40"
@@ -116,8 +136,19 @@ function loadOldChat(getRequestedUserName) {
                                             <div class="flex-shrink-1 bg-light rounded py-2 px-3 mr-3">
                                                 <div class="font-weight-bold mb-1">${user}</div>
                                                 ${chats[i].messages}
-                                            </div>
-                                        </div>`
+                                            </div>`;
+                    if (chats[i].sender_id == sender_id) {
+                        html += '<div class="dropdown">' +
+                            '<button class="btn"  id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">' +
+                            '...' +
+                            '</button>' +
+                            '<ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">' +
+                            '<li><a class="dropdown-item delete" id="delete-' + chats[i].id + '" data-chatId="' + chats[i].id + '" href="#">Delete</a></li>' +
+                            '<li><a class="dropdown-item edit" id="edit-' + chats[i].id + '" data-chatId="' + chats[i].id + '" href="#">Edit</a></li>' +
+                            '</ul>' +
+                            '</div>'
+                    }
+                    html += `</div>`
 
                 }
 
@@ -138,11 +169,11 @@ function scrollChat() {
 }
 
 //scroll call ajax
-
 $(document).ready(function () {
     let container = $('.chat-messages');
     let totalChat = $('.chat-messages').attr('data-totalChat');
     let offset = $('.chat-messages').attr('data-offset');
+
     if (totalChat < offset) {
         container.scroll(function () {
 
@@ -161,9 +192,6 @@ $(document).ready(function () {
                     },
                     success: function (response) {
 
-                        // $.each(response, function (index, data) {
-                        //
-                        // });
 
                         if (response.success) {
                             let html = '';
@@ -220,7 +248,7 @@ $(document).ready(function () {
 
 //Typing... event
 
-$(document).ready(function (){
+$(document).ready(function () {
     let typingTimer;
     const typingTimeout = 1000;
 
@@ -231,34 +259,100 @@ $(document).ready(function (){
     });
 
     function startTyping() {
-        $('#typingIndicator').removeClass('d-none')
-        $.post(`/start-typing/${receiver_id}`, function (data) {
-            console.log('Start Typing event sent successfully', data);
+        $.post(`/start-typing/${receiver_id}/${sender_id}`, function (data) {
+
         });
+
     }
 
     function stopTyping() {
-        $('#typingIndicator').addClass('d-none')
-        $.post(`/stop-typing/${receiver_id}`, function (data) {
-            console.log('Stop Typing event sent successfully', data);
+
+        $.post(`/stop-typing/${receiver_id}/${sender_id}`, function (data) {
+
         });
     }
 
+    window.Echo.channel(`typing`)
+        .listen('.typingEvent', (data) => {
 
-    // window.Echo.private('typingEvent')
-    //     .listen('.typingEvent',(data)=>{
-    //         console.log('Received typing event:', data);
-    //         if (data.isTyping){
-    //             console.log( $('#typingIndicator'));
-    //             $('#typingIndicator').removeClass('d-none')
-    //             // startTyping();
-    //         }else{
-    //             $('#typingIndicator').addClass('d-none')
-    //             // stopTyping();
-    //         }
-    //     })
+            if (data.isTyping && data.senderId == receiver_id) {
+                $('#typingIndicator').removeClass('d-none')
+
+            } else {
+                $('#typingIndicator').addClass('d-none')
+
+            }
+        });
+
 })
 
+
+// For Delete message
+
+$(document).on('click', '.delete', function (e) {
+
+    let chatId = $(this).attr('data-chatId')
+
+    if (chatId) {
+        Swal.fire({
+            title: "Are you sure?",
+            text: "You won't be able to revert this!",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Yes, delete it!"
+        })
+            .then((result) => {
+
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: `delete-chat/${chatId}`,
+                        type: 'GET',
+                        dataType: 'json',
+                        success: function (response) {
+                            if (response.status) {
+                                $('#chat-' + chatId).remove();
+                                Swal.fire({
+                                    title: "Deleted!",
+                                    text: `${response.msg}`,
+                                    icon: "success"
+                                });
+                            } else {
+                                Swal.fire({
+                                    icon: "error",
+                                    title: "Oops...",
+                                    text: "Something went wrong!",
+                                });
+                            }
+                        }
+                    })
+
+                }
+            });
+    } else {
+        Swal.fire({
+            icon: "error",
+            title: "Oops...",
+            text: "Something went wrong!",
+        });
+    }
+
+})
+
+
+function formateDateTime(time) {
+    const currentDate = new Date(time);
+    const day = currentDate.getDate();
+    const month = new Intl.DateTimeFormat('en-US', {month: 'short'}).format(currentDate);
+    const year = currentDate.getFullYear();
+    const hours = currentDate.getHours();
+    const minutes = currentDate.getMinutes();
+    const ampm = hours >= 12 ? 'pm' : 'am';
+    const formattedHours = hours % 12 || 12;
+    // const formattedDateTime = `${day} ${month} ${year} - ${formattedHours}:${minutes} ${ampm}`;
+    return `${formattedHours}:${minutes} ${ampm}`;
+}
 
 window.Echo.join('private-chat')
     .here((users) => {
@@ -293,14 +387,13 @@ window.Echo.private('send-message')
     .listen('.getChatMessage', (data) => {
         let time = data.chat.created_at
         let chat = data.chat.messages
-        let name = data.userInformations.sender_details.name
-
+        let name = data.userInformations.sender.name
         if (sender_id == data.chat.receiver_id && receiver_id == data.chat.sender_id) {
 
             let chatHtml = ` <div class="chat-message-left pb-4">
                                  <div>
                                     <img
-                                        src="https://bootdey.com/img/Content/avatar/avatar3.png"
+                                        src="${data.userImage}"
                                         class="rounded-circle mr-1"
                                         alt="Sharon Lessman"
                                         width="40"
@@ -319,18 +412,13 @@ window.Echo.private('send-message')
             $('.chat-messages').append(chatHtml)
         }
 
-
     })
 
-function formateDateTime(time) {
-    const currentDate = new Date(time);
-    const day = currentDate.getDate();
-    const month = new Intl.DateTimeFormat('en-US', {month: 'short'}).format(currentDate);
-    const year = currentDate.getFullYear();
-    const hours = currentDate.getHours();
-    const minutes = currentDate.getMinutes();
-    const ampm = hours >= 12 ? 'pm' : 'am';
-    const formattedHours = hours % 12 || 12;
-    // const formattedDateTime = `${day} ${month} ${year} - ${formattedHours}:${minutes} ${ampm}`;
-    return `${formattedHours}:${minutes} ${ampm}`;
-}
+
+window.Echo.private('message-deleted')
+    .listen('DeleteMessageEvent', (data) => {
+        let chatId = data.chatId;
+        if (chatId) {
+            $('#chat-' + chatId).remove();
+        }
+    })

@@ -10,34 +10,24 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class SendMessageEvent implements ShouldBroadcast
+class DeleteMessageEvent implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
-
-    private $messages;
-    private $userInformations;
 
     /**
      * Create a new event instance.
      */
-    public function __construct($messages, $userInformations)
+    public $chatId;
+    public function __construct($chatId)
     {
-        $this->messages = $messages;
-        $this->userInformations = $userInformations;
+        $this->chatId=$chatId;
     }
 
-    public function broadcastWith()
+    public function broadcastWith(): array
     {
         return [
-            'chat' => $this->messages,
-            'userInformations' => $this->userInformations,
-            'userImage' => isset($this->userInformations->sender->user_image)?asset('storage/user-image/'.$this->userInformations->sender->user_image):'https://bootdey.com/img/Content/avatar/avatar3.png',
+            'chatId' => $this->chatId,
         ];
-    }
-
-    public function broadcastAs(): string
-    {
-        return 'getChatMessage';
     }
 
     /**
@@ -48,7 +38,7 @@ class SendMessageEvent implements ShouldBroadcast
     public function broadcastOn(): array
     {
         return [
-            new PrivateChannel('send-message'),
+            new PrivateChannel('message-deleted'),
         ];
     }
 }
