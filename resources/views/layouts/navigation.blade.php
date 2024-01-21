@@ -4,7 +4,7 @@
         @php
             $height='';
             $marginButtom='';
-            if (Request::segment(1) == 'dashboard' || Request::segment(1) == 'group'){
+            if (Request::segment(1) == 'dashboard' || Request::segment(1) == 'group' || Request::segment('1')=='all-group'){
                $marginButtom='mb-4' ;
                $height='h-5';
             }else{
@@ -33,6 +33,13 @@
                         {{ __('Your Groups') }}
                     </x-nav-link>
                 </div>
+
+                <div class="hidden space-x-5 sm:-my-px sm:ms-5 sm:flex {{$marginButtom}}">
+                    <x-nav-link :href="route('all-group')" :active="request()->routeIs('all-group')">
+                        {{ __('All Groups') }}
+                    </x-nav-link>
+                </div>
+
             </div>
 
             <!-- Settings Dropdown -->

@@ -33,7 +33,10 @@ Route::middleware('auth')->controller(ChatController::class)->group(function () 
 
 Route::middleware(['auth', 'verified'])->controller(GroupController::class)->group(function (){
     Route::get('/group','index')->name('group');
+    Route::get('/all-group','allGroup')->name('all-group');
+    Route::get('/get-group-information/{slug}','getGroupInformation')->name('get-group-information');
     Route::post('/add-group','store')->name('add-group');
+    Route::post('/send-group-request','sendGroupRequest')->name('send-group-request');
 });
 
 require __DIR__ . '/auth.php';

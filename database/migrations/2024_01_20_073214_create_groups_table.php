@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('name',20);
             $table->tinyInteger('creator_id');
-            $table->string('title',255)->nullable();
+            $table->text('title')->nullable();
             $table->string('short_description',255)->nullable();
             $table->string('image',255)->nullable();
             $table->tinyInteger('status')->nullable()->default(1);

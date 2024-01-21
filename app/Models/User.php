@@ -52,4 +52,10 @@ class User extends Authenticatable
     {
         return $this->hasMany(Chat::class,'receiver_id','id');
     }
+
+    public function groups(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(Group::class,'group_users','user_id','group_id')->withPivot('status');
+    }
+
 }
