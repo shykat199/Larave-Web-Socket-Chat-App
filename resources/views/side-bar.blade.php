@@ -13,22 +13,20 @@
     @if(Request::segment(1) == 'dashboard')
         @php
             $currentUser = \App\Models\User::select('name','user_image')->where('id','=',Auth::id())->first();
-            $currentUserImage = isset($currentUser->user_image) && !empty($currentUser->user_image) ? (asset('storage/user-image/'.$currentUser->user_image)) : 'https://bootdey.com/img/Content/avatar/avatar1.png';
+            $currentUserImage = isset($currentUser->user_image) && !empty($currentUser->user_image) ? (asset('storage/user-image/'.$currentUser->user_image)) : (asset('storage/user-image/user-default_512x512.png'));
         @endphp
         @forelse($allUsers as $user)
-            <a href="#" class="list-group-item list-group-item-action border-0
-            all-group" style="min-height: 50px" data-userid="3" data-username="JavaScript" data-currentuserimage="" data-userimage="http://127.0.0.1:8000/storage/group-image/bbe13d21-bef7-3658-bd34-f6f3a8bef16a.jpeg">
+            <a href="#" class="list-group-item list-group-item-action border-0 user-list
+            all-group" style="min-height: 50px" data-userid="{{$user->id}}" data-username="{{$user->name}}" data-currentuserimage="{{isset($user->user_image) && !empty($user->user_image) ? asset('storage/user-image/'.$user->user_image) : (asset('storage/user-image/user-default_512x512.png'))}}"
+               data-userimage="{{isset($user->user_image) && !empty($user->user_image) ? asset('storage/user-image/'.$user->user_image) : (asset('storage/user-image/user-default_512x512.png'))}}">
 
-                <div class="badge  float-right">
-
-                    <button class="rounded-full h-5 w-5 bg-sky-500 text-white" disabled="">
-                        <i class="fa fa-check" aria-hidden="true"></i>
-                    </button>
+                <div class="badge bg-success float-right">
+                    10
                 </div>
                 <div class="d-flex align-items-start">
-                    <img src="http://127.0.0.1:8000/storage/group-image/bbe13d21-bef7-3658-bd34-f6f3a8bef16a.jpeg" class="rounded-circle mr-1" alt="Vanessa Tucker" width="40" height="40">
+                    <img src="{{isset($user->user_image) && !empty($user->user_image) ? asset('storage/user-image/'.$user->user_image) : (asset('storage/user-image/user-default_512x512.png'))}}" class="rounded-circle mr-1" alt="{{$user->name}}" width="40" height="40">
                     <div class="flex-grow-1 ml-3">
-                        JavaScript
+                        {{$user->name}}
                     </div>
                 </div>
             </a>
@@ -52,10 +50,13 @@
                 </div>
             </div>
         </a>
+
         @forelse($allGroups as $user)
-            <a href="#" class="list-group-item list-group-item-action border-0
-            all-group" style="min-height: 50px" data-userId="{{$user->getGroup->creator_id}}" data-groupId="{{$user->getGroup->id}}" data-userName="{{$user->getGroup->name}}" data-currentUserImage="{{asset('storage/group-image/'.$user->getGroup->image)}}"
-               data-userImage="{{asset('storage/group-image/'.$user->getGroup->image)}}">
+            <a href="#" class="list-group-item list-group-item-action border-0 my-group-lists" style="min-height: 50px"
+               data-isAdmin="{{$user->getGroup->creator_id == Auth::user()->id ? 1 : 0}}"
+               data-userId="{{$user->getGroup->creator_id}}" data-groupId="{{$user->getGroup->id}}"
+               data-grpName="{{$user->getGroup->name}}" data-currentUserImage="{{isset($user->getGroup->image) && !empty($user->getGroup->image) ? asset('storage/group-image/'.$user->getGroup->image) : (asset('storage/group-image/group-default.png'))}}"
+               data-grpImage="{{isset($user->getGroup->image) && !empty($user->getGroup->image) ? asset('storage/group-image/'.$user->getGroup->image) : (asset('storage/group-image/group-default.png'))}}">
 
                 <div class="badge bg-success float-right">
                     10
@@ -103,7 +104,7 @@
                 <div class="badge {{Request::segment(1) != 'all-group' ? ('bg-success') : ('')}} float-right">
 
                     @if(Request::segment(1) != null && Request::segment(1) == 'all-group')
-                        @if($groupRequestedUser && $groupRequestedUser->pivot->status == 1)
+                        @if($groupRequestedUser && $groupRequestedUser->pivot->status == 0)
                             <button class="rounded-full h-5 w-5 bg-sky-500 text-white" disabled>
                                 <i class="fa fa-check" aria-hidden="true"></i>
                             </button>
@@ -247,10 +248,29 @@
 {{--                        </div>--}}
 
                         <div id="send-group-request" class="flex items-center gap-4" data-groupSlug="">
-                            <x-primary-button>{{ __('Send Request') }}</x-primary-button>
+                            <button id="send_request" type="submit" class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                                Send Request
+                            </button>
 
                         </div>
                     </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade bd-group-request-modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle"
+         aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLongTitle">Check Group Request</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body append-group-request-list">
+
                 </div>
             </div>
         </div>

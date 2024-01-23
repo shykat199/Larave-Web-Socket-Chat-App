@@ -37,6 +37,8 @@ Route::middleware(['auth', 'verified'])->controller(GroupController::class)->gro
     Route::get('/get-group-information/{slug}','getGroupInformation')->name('get-group-information');
     Route::post('/add-group','store')->name('add-group');
     Route::post('/send-group-request','sendGroupRequest')->name('send-group-request');
+    Route::get('/get-group-request-list/{id}','getGroupRequestList')->name('get-group-request-list');
+    Route::post('/update-group-request-list','updateGroupRequestList')->name('update-group-request-list');
 });
 
 require __DIR__ . '/auth.php';

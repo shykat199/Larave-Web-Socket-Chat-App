@@ -20,7 +20,8 @@ class GroupController extends Controller
     public function index()
     {
         $allGroups = GroupUser::with('getGroup')
-            ->where('user_id','=',\Auth::user()->id)->get();
+            ->where('status', '=', 1)
+            ->where('user_id', '=', \Auth::user()->id)->get();
 
         return view('group_dashboard', compact('allGroups'));
     }
@@ -99,7 +100,7 @@ class GroupController extends Controller
             $requestedData = [
                 'group_id' => $getGroup->id,
                 'user_id' => \Auth::user()->id,
-                'status' => 1,
+                'status' => 0,
             ];
             $storeData = GroupUser::create($requestedData);
             if ($storeData) {
@@ -114,20 +115,79 @@ class GroupController extends Controller
         }
     }
 
+    public function getGroupRequestList($id)
+    {
+        $getRequestList = Group::with(['users' => function ($query) {
+            $query->wherePivot('status', '=', 0);
+        }])->where('id', '=', $id)->first();
+
+        $html = '';
+        if (!empty($getRequestList->users)) {
+
+            $html .= '
+                <form id="groupRequestedForm"  class="mt-6 space-y-6">
+                <input name="groupId" type="hidden" value="' . $id . '">
+                ';
+            foreach ($getRequestList->users as $user) {
+                $html .= '<div class="form-group">
+                      <input name="userIds" value="' . $user->id . '" type="checkbox" id="user' . $user->id . '">
+                      <label for="html">' . $user->name . '</label>
+                    </div>';
+            }
+            $html .= '<button type="submit" id="requestApproveBtn" class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md
+                    font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900
+                    focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                    Approve
+                    </button>';
+            $html .= '</form>';
+            return response()->json([
+                'status' => true,
+                'html' => $html,
+            ]);
+        } else {
+            return response()->json([
+                'status' => true,
+                'html' => '<span>No User Found</span>',
+            ]);
+        }
+
+
+    }
+
+    public function updateGroupRequestList(Request $request)
+    {
+        $groupIds = $request->post('groupId');
+        $userIds = $request->post('userIds');
+
+        $updateData= GroupUser::whereIn('user_id',$userIds)
+            ->where('group_id',$groupIds)
+            ->update([
+                'status'=>1
+            ]);
+        if ($updateData){
+            return response()->json([
+               'status'=>true,
+               'msg'=>'Request has been Approved',
+            ]);
+        }
+
+    }
+
     public function getGroupInformation($slug)
     {
-        $getGroupInformation = Group::where('slug', '=', $slug)->first();
+        $getGroupInformation = Group::with('users')->where('slug', '=', $slug)->first();
 
-        if ($getGroupInformation) {
+        if ($getGroupInformation && $getGroupInformation->users->contains('id',Auth::user()->id)) {
+
+            return response()->json([
+                'status' => false,
+                'groupInformation' => $getGroupInformation
+            ]);
+        } else {
             return response()->json([
                 'status' => true,
                 'groupInformation' => $getGroupInformation,
                 'groupImage' => isset($getGroupInformation->image) && !empty($getGroupInformation->image) ? asset('storage/group-image/' . $getGroupInformation->image) : (asset('storage/group-image/group-default.png'))
-            ]);
-        } else {
-            return response()->json([
-                'status' => false,
-                'groupInformation' => null
             ]);
         }
     }
