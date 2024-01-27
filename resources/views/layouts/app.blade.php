@@ -32,6 +32,7 @@
 <script>
     let sender_id="{{\Illuminate\Support\Facades\Auth::user()->id}}";
     let receiver_id
+    let group_id
 </script>
 @vite('resources/js/custom.js')
 @vite('resources/js/group.js')

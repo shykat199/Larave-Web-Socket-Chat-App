@@ -39,6 +39,10 @@ Route::middleware(['auth', 'verified'])->controller(GroupController::class)->gro
     Route::post('/send-group-request','sendGroupRequest')->name('send-group-request');
     Route::get('/get-group-request-list/{id}','getGroupRequestList')->name('get-group-request-list');
     Route::post('/update-group-request-list','updateGroupRequestList')->name('update-group-request-list');
+
+    Route::post('/save-group-chat','saveGroupChat')->name('save-group-chat');
+    Route::get('/check-group-user-access','checkGroupUserAccess')->name('check-group-user-access');
+    Route::get('/load-group-old-chat','loadGroupOldChat')->name('load-group-old-chat');
 });
 
 require __DIR__ . '/auth.php';

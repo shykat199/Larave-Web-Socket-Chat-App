@@ -18,3 +18,7 @@ Broadcast::channel('send-message',function ($user){
 Broadcast::channel('message-deleted',function ($user){
     return $user;
 });
+
+Broadcast::channel('get-group-chat',function ($user){
+    return $user;
+});

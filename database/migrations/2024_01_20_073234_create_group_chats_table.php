@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->integer('group_id');
             $table->integer('sender_id');
-            $table->integer('receiver_id');
+            $table->integer('receiver_id')->nullable();
             $table->text('message');
             $table->tinyInteger('status')->default(1);
             $table->timestamps();

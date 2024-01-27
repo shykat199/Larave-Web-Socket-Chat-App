@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\GroupMessageEvent;
 use App\Models\Chat;
 use App\Models\Group;
+use App\Models\GroupChat;
 use App\Models\GroupUser;
 use App\Models\User;
 use Faker\Provider\Uuid;
@@ -11,6 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use mysql_xdevapi\Exception;
 use RealRashid\SweetAlert\Facades\Alert;
 
 
@@ -85,7 +88,6 @@ class GroupController extends Controller
 
     private function generateGroupSlug($name)
     {
-
         $slug = strtolower($name);
         $slug = str_replace(' ', '-', $slug);
         $slug = preg_replace('/[^a-zA-Z0-9\-]/', '', $slug);
@@ -159,15 +161,15 @@ class GroupController extends Controller
         $groupIds = $request->post('groupId');
         $userIds = $request->post('userIds');
 
-        $updateData= GroupUser::whereIn('user_id',$userIds)
-            ->where('group_id',$groupIds)
+        $updateData = GroupUser::whereIn('user_id', $userIds)
+            ->where('group_id', $groupIds)
             ->update([
-                'status'=>1
+                'status' => 1
             ]);
-        if ($updateData){
+        if ($updateData) {
             return response()->json([
-               'status'=>true,
-               'msg'=>'Request has been Approved',
+                'status' => true,
+                'msg' => 'Request has been Approved',
             ]);
         }
 
@@ -177,7 +179,7 @@ class GroupController extends Controller
     {
         $getGroupInformation = Group::with('users')->where('slug', '=', $slug)->first();
 
-        if ($getGroupInformation && $getGroupInformation->users->contains('id',Auth::user()->id)) {
+        if ($getGroupInformation && $getGroupInformation->users->contains('id', Auth::user()->id)) {
 
             return response()->json([
                 'status' => false,
@@ -191,4 +193,118 @@ class GroupController extends Controller
             ]);
         }
     }
+
+    public function checkGroupUserAccess(Request $request)
+    {
+        $userId=$request->get('userId');
+        $groupId=$request->get('groupId');
+        try {
+            $userInGroup=GroupUser::where('user_id','=',$userId)
+                ->where('group_id','=',$groupId)
+                ->where('status','=',1)->first();
+
+            if (!empty($userInGroup)){
+                return response()->json([
+                    'status'=>true,
+                    'msg'=>'Ok'
+                ]);
+            }else{
+                return response()->json([
+                    'status'=>false,
+                    'msg'=>'You are not authorized.'
+                ]);
+            }
+
+        }catch (Exception $e){
+
+        }
+    }
+
+
+    public function saveGroupChat(Request $request)
+    {
+        try {
+            if ($request->ajax()) {
+                $message = $request->post('message');
+                $sender_id = $request->post('sender_id');
+                $group_id = $request->post('group_id');
+
+                $groupMessageData = [
+                    'group_id' => $group_id,
+                    'sender_id' => $sender_id,
+                    'message' => $message,
+                ];
+
+                if ($groupMessageData) {
+
+                    $groupChatInfo = GroupChat::create($groupMessageData);
+
+                    $getGroupWithUserInfo = GroupChat::with(['getMessageWithUserInfo' => function ($query) {
+                        $query->select('id', 'email', 'user_image', 'name');
+                    }])
+                        ->where('id', '=', $groupChatInfo->id)
+                        ->where('group_id', '=', $group_id)
+                        ->first();
+
+                    if ($getGroupWithUserInfo->getMessageWithUserInfo) {
+                        $getGroupWithUserInfo->getMessageWithUserInfo->user_image = asset('storage/user-image/' . $getGroupWithUserInfo->getMessageWithUserInfo->user_image);
+                    } else {
+                        $getGroupWithUserInfo->getMessageWithUserInfo->user_image = asset('storage/user-image/user-default_512x512.png');
+                    }
+                    $userImage=$getGroupWithUserInfo->getMessageWithUserInfo->user_image;
+                    event(new GroupMessageEvent($getGroupWithUserInfo,$userImage));
+                    return response()->json([
+                        'success' => true,
+                        'groupChatInfo' => $getGroupWithUserInfo
+                    ]);
+
+                } else {
+                    return response()->json([
+                        'success' => false,
+                        'msg' => 'Something wrong try again.'
+                    ]);
+                }
+            }
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'msg' => $e->getMessage()
+            ]);
+        }
+
+    }
+
+    public function loadGroupOldChat(Request $request)
+    {
+        $groupId = $request->get('groupId');
+
+        try {
+            $getOldChatList = GroupChat::with(['getGroupMessageWithUserInfo' => function ($query) {
+                $query->select('id', 'email', 'user_image', 'name');
+            }])
+                ->where('group_id', '=', $groupId)->get();
+
+            $getOldChatList->each(function ($chat){
+
+                $chat->getGroupMessageWithUserInfo->user_image = isset($chat->getGroupMessageWithUserInfo->user_image) && !empty($chat->getGroupMessageWithUserInfo->user_image)
+                    ? (filter_var($chat->getGroupMessageWithUserInfo->user_image, FILTER_VALIDATE_URL) ? $chat->getGroupMessageWithUserInfo->user_image : asset('storage/user-image/' . $chat->getGroupMessageWithUserInfo->user_image))
+                    : asset('storage/user-image/user-default_512x512.png');
+            });
+
+            return response()->json([
+                'status' => true,
+                'chatList' => $getOldChatList
+            ]);
+
+        }catch (\Exception $e){
+            return response()->json([
+                'status' => false,
+                'msg' => $e->getMessage()
+            ]);
+        }
+
+        dd($getOldChatList);
+
+    }
+
 }

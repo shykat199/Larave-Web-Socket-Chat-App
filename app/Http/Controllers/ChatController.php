@@ -77,7 +77,7 @@ class ChatController extends Controller
                 // Modify the user image in the sender relation
                 $chat->sender->user_image = isset($chat->sender->user_image) && !empty($chat->sender->user_image)
                     ? (filter_var($chat->sender->user_image, FILTER_VALIDATE_URL) ? $chat->sender->user_image : asset('storage/user-image/' . $chat->sender->user_image))
-                    : 'https://bootdey.com/img/Content/avatar/avatar1.png';
+                    : asset('storage/user-image/user-default_512x512.png');
 
 
                 // Modify the user image in the receiver relation

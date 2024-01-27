@@ -92,7 +92,7 @@
         $currentUser = \App\Models\User::select('name','user_image')->where('id','=',Auth::id())->first();
         $currentUserImage = isset($currentUser->user_image) && !empty($currentUser->user_image) ? (asset('storage/user-image/'.$currentUser->user_image)) : 'https://bootdey.com/img/Content/avatar/avatar1.png';
     @endphp
-    <form action="" id="chat-form">
+    <form action="" id="{{Route::currentRouteName() == 'group'?'group':'chat-form'}}">
     <div class="flex-grow-0 py-3 px-4 border-top">
         <div class="input-group">
 
