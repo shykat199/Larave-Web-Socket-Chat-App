@@ -10,8 +10,10 @@
                     height="40"
                 />
             </div>
-            <div class="flex-grow-1 pl-3 append-gName">
+            <div class="flex-grow-1 pl-1">
+                <div class="flex-grow-1 pl-3 append-gName">
                 <strong id="sender-name"></strong>
+                </div>
                 <div class="text-muted small">
                     <em id="typingIndicator" class="d-none">Typing...</em>
                 </div>

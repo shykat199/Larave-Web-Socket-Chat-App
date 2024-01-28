@@ -12,17 +12,20 @@ Route::get('/', function () {
 });
 
 Route::get('/dashboard', function () {
+
     $allUsers = User::where('id', '!=', \Illuminate\Support\Facades\Auth::user()->id)->get();
     return view('dashboard', compact('allUsers'));
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
+
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
 Route::middleware('auth')->controller(ChatController::class)->group(function () {
+
     Route::post('/save-chat', 'saveChat')->name('save-chat');
     Route::post('/load-old-chat', 'loadOldChat')->name('load-old-chat');
     Route::post('/load-more-chat', 'loadMoreChat')->name('load-more-chat');
@@ -32,6 +35,7 @@ Route::middleware('auth')->controller(ChatController::class)->group(function () 
 });
 
 Route::middleware(['auth', 'verified'])->controller(GroupController::class)->group(function (){
+
     Route::get('/group','index')->name('group');
     Route::get('/all-group','allGroup')->name('all-group');
     Route::get('/get-group-information/{slug}','getGroupInformation')->name('get-group-information');
@@ -43,6 +47,9 @@ Route::middleware(['auth', 'verified'])->controller(GroupController::class)->gro
     Route::post('/save-group-chat','saveGroupChat')->name('save-group-chat');
     Route::get('/check-group-user-access','checkGroupUserAccess')->name('check-group-user-access');
     Route::get('/load-group-old-chat','loadGroupOldChat')->name('load-group-old-chat');
+    Route::get('/group-start-typing/{id}/{userId}','startTyping')->name('start-typing');
+    Route::get('/group-stop-typing/{id}/{userId}','stopTyping')->name('stop-typing');
+    Route::get('/group-chat-delete','deleteGroupChat')->name('delete-group-chat');
 });
 
 require __DIR__ . '/auth.php';

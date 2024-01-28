@@ -1,6 +1,9 @@
 import Echo from "laravel-echo";
 
 $(document).ready(function () {
+    let typingTimer;
+    const typingTimeout = 1000;
+
     $('.send-request').on('click', function () {
         let groupSlug = $(this).attr('data-groupSlug');
         $.ajax({
@@ -74,39 +77,41 @@ $(document).ready(function () {
 
         try {
 
-            const status = await checkUserAccessPermission(sender_id, groupId);
+            await checkUserAccessPermission(sender_id, groupId)
+                .then((status) => {
+                    if (status) {
 
-            if (status) {
+                        $('.message-body').removeClass('d-none');
+                        let groupImage = $(this).attr('data-grpImage');
+                        let groupName = $(this).attr('data-grpName');
+                        let isAdmin = $(this).attr('data-isAdmin');
 
-                $('.message-body').removeClass('d-none');
-                let groupImage = $(this).attr('data-grpImage');
-                let groupName = $(this).attr('data-grpName');
-                let isAdmin = $(this).attr('data-isAdmin');
+                        $('#user-image').attr('src', groupImage)
 
-                $('#user-image').attr('src', groupImage)
-
-                if (isAdmin == 1) {
-                    $('.append-gName').html(`
+                        if (isAdmin == 1) {
+                            $('.append-gName').html(`
          <strong class="check-group-request" data-toggle="modal" data-groupId="${groupId}"
                                 data-target=".bd-group-request-modal" style="text-decoration: underline; cursor: pointer;">
                            ${groupName}
          </strong>
         `)
-                } else {
+                        } else {
 
-                    $('.append-gName').html(`
+                            $('.append-gName').html(`
              <strong id="sender-name">${groupName}</strong>
             `)
-                }
+                        }
 
-                loadGroupOldChat(groupId);
-            } else {
-                Swal.fire({
-                    title: "Sorry!",
-                    text: `You are not authorized.`,
-                    icon: "warning"
-                });
-            }
+                        loadGroupOldChat(groupId);
+                    } else {
+                        Swal.fire({
+                            title: "Sorry!",
+                            text: `You are not authorized.`,
+                            icon: "warning"
+                        });
+                    }
+                })
+
         } catch (error) {
             console.error("Error in AJAX call:", error);
         }
@@ -191,7 +196,7 @@ $(document).ready(function () {
                 let userImage = response.groupChatInfo.get_message_with_user_info.user_image;
                 let userName = response.groupChatInfo.get_message_with_user_info.name;
 
-                let chatHtml = ` <div class="chat-message-right pb-4">
+                let chatHtml = ` <div id="group-chat-${response.groupChatInfo.id}" class="chat-message-right pb-4">
                                             <div>
                                                 <img
                                                     src="${userImage}"
@@ -213,8 +218,8 @@ $(document).ready(function () {
                                                 ...
                                                 </button>
                                                 <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-                                                    <li><a class="dropdown-item delete" id="delete-${chat_id}" data-chatId="${chat_id}" href="#">Delete</a></li>
-                                                    <li><a class="dropdown-item edit" id="edit-${chat_id} + '" data-chatId="${chat_id}" href="#">Edit</a></li>
+                                                    <li><a class="dropdown-item delete-group-chat" id="delete-${chat_id}" data-GroupId="${group_id}" data-chatId="${chat_id}" href="#">Delete</a></li>
+                                                    <li><a class="dropdown-item edit-group-chat" id="edit-${chat_id} + '" data-GroupId="${group_id}" data-chatId="${chat_id}" href="#">Edit</a></li>
                                                 </ul>
                                             </div>
                                         </div>`;
@@ -224,7 +229,81 @@ $(document).ready(function () {
             }
         })
     })
+
+    $(document).on('input', '#message', function () {
+        clearTimeout(typingTimer);
+        startTyping()
+        typingTimer = setTimeout(stopTyping, typingTimeout);
+    })
+
+    $(document).on('click', '.delete-group-chat', function (e) {
+        e.preventDefault()
+        let groupId = $(this).attr('data-GroupId');
+        let chatId = $(this).attr('data-chatId');
+
+        if (chatId && groupId) {
+            Swal.fire({
+                title: "Are you sure?",
+                text: "You won't be able to revert this!",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Yes, delete it!"
+            })
+                .then((result) => {
+
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: 'group-chat-delete',
+                            type: "GET",
+                            data: {
+                                groupId: groupId,
+                                chatId: chatId
+                            },
+                            success: function (response) {
+                                if (response.status) {
+                                    $('#group-chat-' + chatId).remove();
+                                    Swal.fire({
+                                        title: "Deleted!",
+                                        text: `${response.msg}`,
+                                        icon: "success"
+                                    });
+                                } else {
+                                    Swal.fire({
+                                        icon: "error",
+                                        title: "Oops...",
+                                        text: "Something went wrong!",
+                                    });
+                                }
+                            }
+                        })
+                    }
+                });
+        } else {
+            Swal.fire({
+                icon: "error",
+                title: "Oops...",
+                text: "Something went wrong!",
+            });
+        }
+
+
+    })
+
 });
+
+function startTyping() {
+    $.get(`group-start-typing/${group_id}/${sender_id}`, function ($data) {
+
+    });
+}
+
+function stopTyping() {
+    $.get(`group-stop-typing/${group_id}/${sender_id}`, function ($data) {
+
+    });
+}
 
 function loadGroupOldChat(groupId) {
     $.ajax({
@@ -253,7 +332,7 @@ function loadGroupOldChat(groupId) {
                     }
 
 
-                    html += `<div id="chat-${chats[key].id}" class="` + dynamicClass + ` pb-4">
+                    html += `<div id="group-chat-${chats[key].id}" class="` + dynamicClass + ` pb-4">
                                             <div>
                                                 <img
                                                     src="${userImage}"
@@ -276,8 +355,8 @@ function loadGroupOldChat(groupId) {
                             '...' +
                             '</button>' +
                             '<ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">' +
-                            '<li><a class="dropdown-item delete" id="delete-' + chats[key].id + '" data-chatId="' + chats[key].id + '" href="#">Delete</a></li>' +
-                            '<li><a class="dropdown-item edit" id="edit-' + chats[key].id + '" data-chatId="' + chats[key].id + '" href="#">Edit</a></li>' +
+                            '<li><a class="dropdown-item delete-group-chat" id="delete-' + chats[key].id + '" data-chatId="' + chats[key].id + '" data-groupId="' + group_id + '" href="#">Delete</a></li>' +
+                            '<li><a class="dropdown-item edit-group-chat" id="edit-' + chats[key].id + '" data-chatId="' + chats[key].id + '" href="#">Edit</a></li>' +
                             '</ul>' +
                             '</div>'
                     }
@@ -363,6 +442,25 @@ window.Echo.private('get-group-chat')
                         </div>`
 
             $('.chat-messages').append(chatHtml)
+        }
+    })
+
+window.Echo.private('group-typing-event')
+    .listen('GroupTypingEvent', (data) => {
+        if (data.isTyping && data.groupId == group_id && data.sender_id != sender_id) {
+            $('#typingIndicator').removeClass('d-none')
+
+        } else {
+            $('#typingIndicator').addClass('d-none')
+
+        }
+    })
+
+window.Echo.private('delete-group-chat')
+    .listen('GroupChatDeleteEvent', (data) => {
+        let chatId = data.chatId;
+        if (chatId) {
+            $('#group-chat-' + chatId).remove();
         }
     })
 

@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\GroupChatDeleteEvent;
 use App\Events\GroupMessageEvent;
+use App\Events\GroupTypingEvent;
 use App\Models\Chat;
 use App\Models\Group;
 use App\Models\GroupChat;
@@ -305,6 +307,53 @@ class GroupController extends Controller
 
         dd($getOldChatList);
 
+    }
+
+    public function startTyping($id,$sender_id)
+    {
+        $this->broadcastGroupTypingEvent($id,true,$sender_id);
+        return response()->json([
+            'status'=>true
+        ]);
+    }
+
+    public function stopTyping($id,$sender_id)
+    {
+        $this->broadcastGroupTypingEvent($id,false,$sender_id);
+        return response()->json([
+            'status'=>true
+        ]);
+    }
+
+    public function broadcastGroupTypingEvent($id,$isTyping,$sender_id)
+    {
+        broadcast(new GroupTypingEvent('Typing...',$id,$isTyping,$sender_id));
+    }
+
+    public function deleteGroupChat(Request $request)
+    {
+        $groupId=$request->get('groupId');
+        $chatId=$request->get('chatId');
+
+        try {
+            $deleteChat=GroupChat::where([
+                'group_id'=>$groupId,
+                'id'=>$chatId
+            ])->first();
+            if ($deleteChat){
+                $deleteChat->delete();
+                event(new GroupChatDeleteEvent($chatId));
+                return response()->json([
+                    'status'=>true,
+                    'msg'=>'Message deleted successfully'
+                ]);
+            }
+        }catch (Exception $e){
+            return response()->json([
+                'status'=>false,
+                'msg'=>$e->getMessage()
+            ]);
+        }
     }
 
 }

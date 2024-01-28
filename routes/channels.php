@@ -22,3 +22,11 @@ Broadcast::channel('message-deleted',function ($user){
 Broadcast::channel('get-group-chat',function ($user){
     return $user;
 });
+
+Broadcast::channel('group-typing-event',function ($user){
+    return $user;
+});
+
+Broadcast::channel('delete-group-chat',function ($user){
+    return $user;
+});

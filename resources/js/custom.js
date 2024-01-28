@@ -318,7 +318,8 @@ $(document).on('click', '.delete', function (e) {
                                     text: `${response.msg}`,
                                     icon: "success"
                                 });
-                            } else {
+                            }
+                            else {
                                 Swal.fire({
                                     icon: "error",
                                     title: "Oops...",
@@ -330,7 +331,8 @@ $(document).on('click', '.delete', function (e) {
 
                 }
             });
-    } else {
+    }
+    else {
         Swal.fire({
             icon: "error",
             title: "Oops...",
