@@ -5,11 +5,19 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ChatController;
 use App\Models\User;
 use App\Http\Controllers\GroupController;
+use App\Http\Controllers\Auth\ProviderController;
 
 
 Route::get('/', function () {
     return view('welcome');
 });
+
+
+Route::controller(ProviderController::class)->group(function (){
+    Route::get('/auth/{provider}/redirect','redirectUrl')->name('redirect');
+    Route::get('/auth/{provider}/callback','callbackUrl')->name('callbacks');
+});
+
 
 Route::get('/dashboard', function () {
 
