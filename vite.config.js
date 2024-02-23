@@ -9,6 +9,7 @@ export default defineConfig({
                 'resources/js/app.js',
                 'resources/js/custom.js',
                 'resources/js/group.js',
+                'resources/js/audio-video.js',
             ],
             refresh: true,
         }),

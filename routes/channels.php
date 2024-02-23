@@ -30,3 +30,10 @@ Broadcast::channel('group-typing-event',function ($user){
 Broadcast::channel('delete-group-chat',function ($user){
     return $user;
 });
+
+Broadcast::channel('MessageFromPeer',function ($user){
+    return $user;
+});
+Broadcast::channel('handel-offer-channel',function ($user){
+    return $user;
+});

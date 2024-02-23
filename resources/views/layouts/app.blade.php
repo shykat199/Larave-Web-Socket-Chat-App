@@ -19,7 +19,7 @@
           integrity="sha512-d0olNN35C6VLiulAobxYHZiXJmq+vl+BGIgAxQtD5+kqudro/xNMvv2yIHAciGHpExsIbKX3iLg+0B6d0k4+ZA=="
           crossorigin="anonymous" referrerpolicy="no-referrer"/>
     <!-- Scripts -->
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @vite(['resources/css/app.css', 'resources/js/app.js', 'resources/js/audio-video.js'])
     @stack('custom.style')
 
 </head>

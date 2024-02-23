@@ -26,8 +26,8 @@ $(document).ready(function () {
 
     $('#chat-form').submit(function (e) {
         e.preventDefault();
-        let message = $('#message').val();
-        let currentUserImage = $('#message').attr('data-currentUserImage');
+        let message = $('#messageText').val();
+        let currentUserImage = $('#messageText').attr('data-currentUserImage');
 
         $.ajax({
             url: '/save-chat',

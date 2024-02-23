@@ -6,6 +6,7 @@ use App\Http\Controllers\ChatController;
 use App\Models\User;
 use App\Http\Controllers\GroupController;
 use App\Http\Controllers\Auth\ProviderController;
+use App\Http\Controllers\VideoAudioController;
 
 
 Route::get('/', function () {
@@ -13,9 +14,9 @@ Route::get('/', function () {
 });
 
 
-Route::controller(ProviderController::class)->group(function (){
-    Route::get('/auth/{provider}/redirect','redirectUrl')->name('redirect');
-    Route::get('/auth/{provider}/callback','callbackUrl')->name('callbacks');
+Route::controller(ProviderController::class)->group(function () {
+    Route::get('/auth/{provider}/redirect', 'redirectUrl')->name('redirect');
+    Route::get('/auth/{provider}/callback', 'callbackUrl')->name('callbacks');
 });
 
 
@@ -42,22 +43,30 @@ Route::middleware('auth')->controller(ChatController::class)->group(function () 
     Route::get('/delete-chat/{id}', 'deleteChat')->name('deleteChat');
 });
 
-Route::middleware(['auth', 'verified'])->controller(GroupController::class)->group(function (){
+Route::middleware(['auth', 'verified'])->controller(GroupController::class)->group(function () {
 
-    Route::get('/group','index')->name('group');
-    Route::get('/all-group','allGroup')->name('all-group');
-    Route::get('/get-group-information/{slug}','getGroupInformation')->name('get-group-information');
-    Route::post('/add-group','store')->name('add-group');
-    Route::post('/send-group-request','sendGroupRequest')->name('send-group-request');
-    Route::get('/get-group-request-list/{id}','getGroupRequestList')->name('get-group-request-list');
-    Route::post('/update-group-request-list','updateGroupRequestList')->name('update-group-request-list');
+    Route::get('/group', 'index')->name('group');
+    Route::get('/all-group', 'allGroup')->name('all-group');
+    Route::get('/get-group-information/{slug}', 'getGroupInformation')->name('get-group-information');
+    Route::post('/add-group', 'store')->name('add-group');
+    Route::post('/send-group-request', 'sendGroupRequest')->name('send-group-request');
+    Route::get('/get-group-request-list/{id}', 'getGroupRequestList')->name('get-group-request-list');
+    Route::post('/update-group-request-list', 'updateGroupRequestList')->name('update-group-request-list');
 
-    Route::post('/save-group-chat','saveGroupChat')->name('save-group-chat');
-    Route::get('/check-group-user-access','checkGroupUserAccess')->name('check-group-user-access');
-    Route::get('/load-group-old-chat','loadGroupOldChat')->name('load-group-old-chat');
-    Route::get('/group-start-typing/{id}/{userId}','startTyping')->name('start-typing');
-    Route::get('/group-stop-typing/{id}/{userId}','stopTyping')->name('stop-typing');
-    Route::get('/group-chat-delete','deleteGroupChat')->name('delete-group-chat');
+    Route::post('/save-group-chat', 'saveGroupChat')->name('save-group-chat');
+    Route::get('/check-group-user-access', 'checkGroupUserAccess')->name('check-group-user-access');
+    Route::get('/load-group-old-chat', 'loadGroupOldChat')->name('load-group-old-chat');
+    Route::get('/group-start-typing/{id}/{userId}', 'startTyping')->name('start-typing');
+    Route::get('/group-stop-typing/{id}/{userId}', 'stopTyping')->name('stop-typing');
+    Route::get('/group-chat-delete', 'deleteGroupChat')->name('delete-group-chat');
+});
+
+Route::middleware('auth')->controller(VideoAudioController::class)->group(function (){
+    Route::post('/send-offer','createOffer')->name('create-offer');
+    Route::get('/send-answer','sendAnswer')->name('send-answer');
+    Route::post('/handle-offer', 'handleOffer')->name('handle-offer');
+    Route::post('/handle-candidate', 'handleCandidate')->name('handle-candidate');
+    Route::post('/create-answer', 'createAnswer')->name('create-answer');
 });
 
 require __DIR__ . '/auth.php';

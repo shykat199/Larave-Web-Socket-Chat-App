@@ -19,7 +19,7 @@
                 </div>
             </div>
             <div>
-                <button class="btn btn-primary btn-lg mr-1 px-3">
+                <button class="audio-call btn btn-primary btn-lg mr-1 px-3">
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
                         width="24"
@@ -37,9 +37,7 @@
                         ></path>
                     </svg>
                 </button>
-                <button
-                    class="btn btn-info btn-lg mr-1 px-3 d-none d-md-inline-block"
-                >
+                <button class="video-call btn btn-info btn-lg mr-1 px-3 d-none d-md-inline-block">
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
                         width="24"
@@ -63,27 +61,10 @@
                         ></rect>
                     </svg>
                 </button>
-                <button class="btn btn-light border btn-lg px-3">
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="24"
-                        height="24"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        class="feather feather-more-horizontal feather-lg"
-                    >
-                        <circle cx="12" cy="12" r="1"></circle>
-                        <circle cx="19" cy="12" r="1"></circle>
-                        <circle cx="5" cy="12" r="1"></circle>
-                    </svg>
-                </button>
             </div>
         </div>
     </div>
+    @include('audio-video')
     <div class="position-relative">
         <div class="chat-messages p-4" style="min-height: 450px; max-height: 420px;" data-offset="10" data-totalChat="">
 
@@ -104,7 +85,7 @@
                     placeholder="Type your message...."
                     name="message"
                     data-currentUserImage="{{$currentUserImage}}"
-                    id="message"
+                    id="messageText"
                 />
                 <button class="btn btn-primary">Send</button>
         </div>
